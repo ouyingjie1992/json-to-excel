@@ -1,5 +1,6 @@
 const GetJson = require('../service/getJson');
 const CreateExcel = require('../service/createExcel');
+const fs = require("fs");
 
 Date.prototype.format = function(fmt) {
     var o = {
@@ -39,15 +40,35 @@ Date.prototype.format = function(fmt) {
     return fmt;
 };
 
+
 const jsonToExcelController = {
-    async init() {
-        let date = (new Date()).format('yyyyMMdd-HHmmss');
-        let savefileName = '20200407-1';
-        let res = await GetJson.getData(`testData/source/${savefileName}/shopList`, 'shopList');
-        let status = await CreateExcel.createFile(date, res, 'shopList', savefileName);
-        let res2 = await GetJson.getData(`testData/source/${savefileName}/foodList`, 'foodList');
-        let status2 = await CreateExcel.createFile(date, res2, 'foodList', savefileName);
-        return status + status2;
+    async init(fileName) {
+        let res = {
+            code: '',
+            data: ''
+        };
+        const date = (new Date()).format('yyyyMMdd-HHmmss');
+        const savefileName = fileName;
+        const path = `testData/source/${savefileName}`;
+        let resData = await GetJson.getData(path, 'shopList');
+        let status = '';
+        let status2 = '';
+        if(resData.code === 5000) {
+            status = await CreateExcel.createFile(date, resData.data, 'shopList', savefileName);
+        } else {
+            status = resData.data;
+        }
+        let resData2 = await GetJson.getData(path, 'foodList');
+        if(resData2.code === 5000) {
+            status2 = await CreateExcel.createFile(date, resData2.data, 'foodList', savefileName);
+        } else {
+            status2 = resData2.data;
+        }
+        res = {
+            code: '5000',
+            data: status + status2
+        }
+        return res;
     }
 }
 

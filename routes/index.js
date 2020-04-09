@@ -18,11 +18,11 @@ router.get("/json", async (ctx, next) => {
 });
 
 router.get("/jsonToExcel", async (ctx, next) => {
-	//     // 解析json转化excel
-	analysisCtrl.jsonToExcel();
-	ctx.body = {
-		title: "jsonToExcel",
-	};
+    //     // 解析json转化excel
+    let query = ctx.query||{};
+    let fileName = query.fileName||'';
+    let res = await analysisCtrl.jsonToExcel(fileName);
+	ctx.body = res;
 });
 
 module.exports = router;

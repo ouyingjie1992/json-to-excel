@@ -6,7 +6,7 @@ const mimeType = require('mime-types');
 const path = require("path");
 
 // 处理数字
-const realNumberArr = [
+let realNumberArr = [
     {
         key1: '&#xe30d;',
         key2: '0'
@@ -48,7 +48,23 @@ const realNumberArr = [
         key2: '9'
     }
 ];
-// 格式化数据-shoplist
+
+/**
+ * 读取路径信息
+ * @param {string} path 路径
+ */
+const getStat = (path) => {
+	return new Promise((resolve, reject) => {
+		fs.stat(path, (err, stats) => {
+			if (err) {
+				resolve(false);
+			} else {
+				resolve(stats);
+			}
+		});
+	});
+};
+// 格式化数据-shopList
 const deDuplication1 = (data) => {
     if(!data) {
         return [];
@@ -141,7 +157,6 @@ const deDuplication2 = (res) => {
 const parse = (file) => {
     let filePath = path.resolve(file); // 原始文件地址
     let fileMimeType = mimeType.lookup(filePath); // 获取文件的 memeType
-    console.log(filePath)
     let fileName = filePath.split('\\').slice(-1)[0].split('/').slice(-1)[0].split('.')[0]; // 提取文件名
     let parentFileName = filePath.split('\\').slice(-1)[0].split('/').slice(-2)[0];
     let returnData = {
@@ -183,14 +198,46 @@ const dirEach = (dir) => {
     return resultData;
 };
 
-const getJsonService = {
-    async getData(file, type) {
-        let resultData = {};
-        // 获取输入的文件地址或目录地址
-        const MSG_ERROR_INPUT_EMPTY = 'File or filePath cann not be empty!';
-        const MSG_WARN_OPTION_EMPTY = 'No option';
-        if (!file) return console.error(new Error(MSG_ERROR_INPUT_EMPTY));
+const getWoff = (filePath) => {
+    let buffer = fs.readFileSync(filePath, 'utf-8');
+    let json = JSON.stringify(buffer);
+    json = JSON.parse(json);
+    json = JSON.parse(json);
+    return json;
+};
 
+const getJsonService = {
+    async getData(path, type) {
+        let res = {};
+        let file = path;
+        if(type === 'shopList') {
+            file += '/shopList';
+        } else if(type === 'foodList') {
+            file += '/foodList';
+        }
+        let isExists1 = await getStat(file);
+        if(!isExists1) {
+            // 路径不存在
+            res = {
+                code: '7000',
+                data: 'source路径不存在'
+            }
+            return res;
+        }
+        const woffPath = `${path}/woff.json`;
+        let isExists2 = await getStat(woffPath);
+        if(!isExists2) {
+            // 文件不存在
+            res = {
+                code: '7000',
+                data: 'woff解密文件不存在'
+            }
+            return res;
+        }
+        
+        // 读取woff解密枚举
+        realNumberArr = await getWoff(woffPath);
+        let resultData = {};
         // 读取文件
         const stat = fs.lstatSync(file);
         // 如果是文件则直接解析
@@ -201,8 +248,6 @@ const getJsonService = {
         if (stat.isDirectory()) {
             resultData = await dirEach(file);
         }
-        // 无对应操作
-        console.log(MSG_WARN_OPTION_EMPTY);
         if(type === 'shopList') {
             resultData = deDuplication1(resultData);
         } else if(type === 'foodList') {
@@ -210,7 +255,11 @@ const getJsonService = {
         } else {
             resultData = [];
         }
-        return resultData;
+        res = {
+            code: 5000,
+            data: resultData
+        };
+        return res;
     }
 }
 
