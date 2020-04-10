@@ -21,7 +21,8 @@
     "koa-views": "^6.2.0",
     "pug": "^2.0.3",
     "mime-types": "^2.1.24",
-    "node-xlsx": "^0.15.0"
+    "node-xlsx": "^0.15.0",
+    "cheerio": "^0.22.0"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

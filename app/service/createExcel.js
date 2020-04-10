@@ -200,11 +200,12 @@ const createExcelService = {
 		// console.log(fileName)
 		let outFileName = ``;
 		if (type === "shopList") {
-			outFileName = `shopList-`;
+			outFileName = `shopList`;
 		} else if (type === "foodList") {
-			outFileName = `foodList-`;
+			outFileName = `foodList`;
 		}
-		outFileName += `${fileName}.xlsx`;
+		outFileName += `.xlsx`;
+		// outFileName += `-${fileName}.xlsx`;
 		let outFile = path.join(outPathReal, outFileName);
 		fs.access(outFile, (err) => {
 			if (err) {
