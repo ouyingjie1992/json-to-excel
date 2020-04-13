@@ -53,6 +53,7 @@ const jsonToExcelController = {
         let resData = await GetJson.getData(path, 'shopList');
         let status = '';
         let status2 = '';
+        let status3 = '';
         if(resData.code === 5000) {
             status = await CreateExcel.createFile(date, resData.data, 'shopList', savefileName);
         } else {
@@ -64,9 +65,15 @@ const jsonToExcelController = {
         } else {
             status2 = resData2.data;
         }
+        let resData3 = await GetJson.getData(path, 'searchList');
+        if(resData3.code === 5000) {
+            status3 = await CreateExcel.createFile(date, resData3.data, 'searchList', savefileName);
+        } else {
+            status3 = resData3.data;
+        }
         res = {
             code: '5000',
-            data: status + status2
+            data: `${status}>>>>>>>>${status2}>>>>>>>>${status3}`
         }
         return res;
     }

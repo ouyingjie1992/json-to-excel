@@ -42,6 +42,7 @@ const tableModel1 = [
 		value: "discounts2", //数组
 	},
 ];
+
 // 商品Excel
 const options2 = {
 	"!cols": [
@@ -92,6 +93,96 @@ const tableModel2 = [
 	{
 		name: "所属栏目",
 		value: "categoryName", //数组
+	},
+];
+
+// 搜索页面-店铺Excel
+const options3 = {
+	"!cols": [
+		{ wch: 40 },
+		{ wch: 5 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 79 },
+		{ wch: 12 },
+	],
+}; //设置表格宽度
+const tableModel3 = [
+	{
+		name: "店铺名称",
+		value: "shopName",
+	},
+	{
+		name: "星评",
+		value: "wmPoiScore",
+	},
+	{
+		name: "月销量",
+		value: "monthSalesTip",
+	},
+	{
+		name: "起送价格",
+		value: "minPriceTip",
+	},
+	{
+		name: "人均",
+		value: "averagePriceTip",
+	},
+	{
+		name: "优惠活动",
+		value: "discounts2", //数组
+	},
+	{
+		name: "店铺类别",
+		value: "thirdCategory", 
+	},
+];
+// 搜索页面-热销商品Excel
+const options4 = {
+	"!cols": [
+		{ wch: 40 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 12 },
+		{ wch: 40 },
+	],
+}; //设置表格宽度
+const tableModel4 = [
+	{
+		name: "商品名称",
+		value: "spuName",
+	},
+	{
+		name: "原价",
+		value: "originPrice",
+	},
+	{
+		name: "现价",
+		value: "currentPrice",
+	},
+	{
+		name: "点赞数",
+		value: "praiseNum",
+	},
+	{
+		name: "月销量",
+		value: "saleVolumeDecoded",
+	},
+	{
+		name: "折扣",
+		value: "promotionInfo", //数组
+	},
+	{
+		name: "所属栏目",
+		value: "categoryName", 
+	},
+	{
+		name: "店铺名称",
+		value: "shopName", 
 	},
 ];
 
@@ -153,44 +244,54 @@ async function dirExists(dir) {
 
 const createExcelService = {
 	async createFile(fileName, data, type, savefileName) {
-		let options = {};
-		let tableModel = [];
+
+        const initOption = (tableName, tableModel, data, options) => {
+            let option = {};
+            let tableData = [];
+            // tableData = [
+            //     ['name', 'sex', 'age'],
+            //     ['zs', 'man', '19'],
+            //     ['ls', 'man', '28']
+            // ];
+            // 构建表头
+            let tableTheadData = [];
+            for (let i = 0; i < tableModel.length; i++) {
+                tableTheadData.push(tableModel[i].name);
+            }
+            tableData.push(tableTheadData);
+            // 填充数据
+            for (let i = 0; i < data.length; i++) {
+                let item = data[i];
+                let tempList = [];
+                for (let k = 0; k < tableModel.length; k++) {
+                    tempList.push(item[tableModel[k].value]);
+                }
+                tableData.push(tempList);
+            }
+            option = { 
+                name: tableName, 
+                data: tableData,
+                options: options
+            }
+            return option;
+        };
+        let optionObj = [];
 		if (type === "shopList") {
-			options = options1;
-			tableModel = tableModel1;
+            let tempObj = initOption('店铺信息', tableModel1, data, options1);
+            optionObj.push(tempObj);
 		} else if (type === "foodList") {
-			options = options2;
-			tableModel = tableModel2;
+            let tempObj = initOption('菜单信息', tableModel2, data, options2);
+            optionObj.push(tempObj);
+		} else if (type === "searchList") {
+            let tempObj = initOption('店铺信息', tableModel3, data.shopInfo, options3);
+            optionObj.push(tempObj);
+            let tempObj2 = initOption('热销菜品信息', tableModel4, data.foodInfo, options4);
+            optionObj.push(tempObj2);
 		} else {
 			return `文件数据有误:${fileName}`;
 		}
-		let tableData = [];
-		// tableData = [
-		//     ['name', 'sex', 'age'],
-		//     ['zs', 'man', '19'],
-		//     ['ls', 'man', '28']
-		// ];
 
-		// 构建表头
-		let tableTheadData = [];
-		for (let i = 0; i < tableModel.length; i++) {
-			tableTheadData.push(tableModel[i].name);
-		}
-		tableData.push(tableTheadData);
-		// 填充数据
-		for (let i = 0; i < data.length; i++) {
-			let item = data[i];
-			let tempList = [];
-			for (let k = 0; k < tableModel.length; k++) {
-				tempList.push(item[tableModel[k].value]);
-			}
-			tableData.push(tempList);
-		}
-
-		let buffer = xlsx.build(
-			[{ name: "mySheetName", data: tableData }],
-			options
-		); //生成buffer文件流
+		let buffer = xlsx.build(optionObj); //生成buffer文件流
 		let outPath = `testData/output/`;
 		if (savefileName) {
 			outPath += `${savefileName}/`;
@@ -203,6 +304,8 @@ const createExcelService = {
 			outFileName = `shopList`;
 		} else if (type === "foodList") {
 			outFileName = `foodList`;
+		} else if (type === "searchList") {
+			outFileName = `searchList`;
 		}
 		outFileName += `.xlsx`;
 		// outFileName += `-${fileName}.xlsx`;

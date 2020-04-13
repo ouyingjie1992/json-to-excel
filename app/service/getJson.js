@@ -65,6 +65,7 @@ const getStat = (path) => {
 	});
 };
 // 格式化数据-shopList
+// https://i.waimai.meituan.com/openh5/channel/kingkongshoplist
 const deDuplication1 = (data) => {
     if(!data) {
         return [];
@@ -112,7 +113,9 @@ const deDuplication1 = (data) => {
     }
     return resultArr;
 };
+
 // 格式化数据-foodlist
+// https://i.waimai.meituan.com/openh5/poi/food
 const deDuplication2 = (res) => {
     if(!res) {
         return [];
@@ -151,6 +154,99 @@ const deDuplication2 = (res) => {
         }
     }
     return resultArr;
+};
+
+// 格式化数据-shopList
+// https://i.waimai.meituan.com/openh5/search/poi
+const deDuplication3 = (data) => {
+    if(!data) {
+        return [];
+    }
+    let shopNameArr = [];
+    let resultArr = []; //店铺信息
+    let resultArr2 = []; //热销菜品信息
+    for (let i = 0; i < data.length; i++) {
+        let item = data[i];
+        let parentFileName = item.parentFileName;
+        item.data = item.data || {};
+        let shopList = item.data.searchPoiList || [];
+        for (let j = 0; j < shopList.length; j++) {
+            let tempItem = shopList[j]||{};
+            let item2 = {
+                shopName: tempItem.name, //店铺名称
+                wmPoiScore: tempItem.wmPoiScore, //星评
+                monthSalesTip: tempItem.monthSalesTip, //月销量
+                minPriceTip: tempItem.minPriceTip, //起送价格
+                averagePriceTip: tempItem.averagePriceTip, //人均
+                discounts2: tempItem.activityList, //优惠活动
+                thirdCategory: tempItem.thirdCategory, //店铺类别
+            };
+            item2.parentFileName = parentFileName;
+            // 热销菜品信息
+            let foodList = [];
+            let tempFoodList = tempItem.productList||[];
+            for(let n=0; n<tempFoodList.length; n++) {
+                let item = tempFoodList[n];
+                let food = {
+                    spuName: item.productName, //商品名称
+                    originPrice: item.originalPrice, //原价
+                    currentPrice: item.price, //现价
+                    praiseNum: item.praiseContent, //点赞数
+                    saleVolumeDecoded: item.monthSalesDecoded, //月销量
+                    promotionInfo: item.promotionInfo, //折扣
+                    categoryName: item2.thirdCategory, //所属栏目
+                    shopName: item2.shopName, //店铺名称
+                };
+                // 数字解密
+                for (let val in food) {
+                    for (let k = 0; k < realNumberArr.length; k++) {
+                        food[val] = food[val].toString();
+                        food[val] = food[val].replace(new RegExp(realNumberArr[k].key1,'g'), realNumberArr[k].key2);
+                    }
+                }
+                foodList.push(food);
+            }
+
+            // 处理优惠活动信息
+            let discounts2 = '';
+            if(item2.discounts2 != null) {
+                for (let k = 0; k < item2.discounts2.length; k++) {
+                    discounts2 += item2.discounts2[k].info + ';';
+                }
+            }
+            item2.discounts2 = discounts2;
+
+            // 处理月销量信息
+            let monthSalesTip = '';
+            monthSalesTip = item2.monthSalesTip.replace('月售', '');
+            item2.monthSalesTip = monthSalesTip;
+
+            // 数字解密
+            for (let val in item2) {
+                for (let k = 0; k < realNumberArr.length; k++) {
+                    item2[val] = item2[val].toString();
+                    item2[val] = item2[val].replace(new RegExp(realNumberArr[k].key1,'g'), realNumberArr[k].key2);
+                }
+            }
+
+            // 用店名去重 shopName
+            let index = shopNameArr.indexOf(item2.shopName);
+            if (index === -1) {
+                shopNameArr.push(item2.shopName);
+                resultArr.push(item2);
+                resultArr2.push.apply(resultArr2, foodList);
+            } else {
+                // if (!isNaN(item2.parentFileName) && !isNaN(resultArr[index].parentFileName) && item2.parentFileName > resultArr[index].parentFileName) {
+                    // 这里需要规范json目录下的二级目录名称按照收集数据的当天日期命名yyyyMMDD
+                    resultArr.splice(index, 1, item2);
+                // }
+            }
+        }
+    }
+    return {
+        shopInfo: resultArr,
+        foodInfo: resultArr2
+    };
 };
 
 // 读取单个json文件
@@ -214,6 +310,8 @@ const getJsonService = {
             file += '/shopList';
         } else if(type === 'foodList') {
             file += '/foodList';
+        } else if(type === 'searchList') {
+            file += '/searchList';
         }
         let isExists1 = await getStat(file);
         if(!isExists1) {
@@ -252,6 +350,8 @@ const getJsonService = {
             resultData = deDuplication1(resultData);
         } else if(type === 'foodList') {
             resultData = deDuplication2(resultData);
+        } else if(type === 'searchList') {
+            resultData = deDuplication3(resultData);
         } else {
             resultData = [];
         }
