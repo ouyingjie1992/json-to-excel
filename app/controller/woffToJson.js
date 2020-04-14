@@ -1,6 +1,5 @@
-const exec = require('child_process').exec;
-const execSync = require('child_process').execSync;
 const createJson = require('../service/createJson');
+const createXml = require('../service/createXml');
 
 
 const woffToJsonController = {
@@ -10,22 +9,19 @@ const woffToJsonController = {
             data: ''
         };
         let path = `testData/source/${fileName}/`;
-        // 异步执行
-        // exec('python testData/woffToXml.py',function(error,stdout,stderr){
-        //     if(error) {
-        //         console.info('stderr : '+stderr);
-        //     }
-        //     console.log('exec: ' + stdout);
-        // })
-        // 同步执行
-        const output = execSync('python testData/woffToXml.py ' + path)
-        // console.log(output.toString())
-        let resData = await createJson.createFile(path);
 
-        res = {
-            code: 5000,
-            data: '完成woff转化json'
+        // woff解析xml  同步执行
+        let resXml = await createXml.output(path);
+        if(resXml.code === 5000) {
+            // xml生成秘钥json文件
+            res = await createJson.createFile(path);
+        } else {
+            res = {
+                code: 7000,
+                data: 'xml生成秘钥json文件失败'
+            }
         }
+
         return res;
     }
 }

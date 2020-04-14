@@ -45,7 +45,10 @@ const createJsonService = {
         let filePath = `${path}woff.json`;
         fs.writeFileSync(filePath, JSON.stringify(resJson, null, '\t'));
 
-		return `文件输出成功！${filePath}`;
+		return {
+            code: 5000,
+            data: `文件输出成功！${filePath}`
+        };
 	},
 };
 
