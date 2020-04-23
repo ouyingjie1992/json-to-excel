@@ -6,11 +6,11 @@ json-to-excel
 testData目录结构：
 --source
     --fileName
-        --foodlist
+        --foodList
             --data.json
-        --shoplist
+        --shopList
             --data.json
-        --searchlist
+        --searchList
             --data.json
         --test.woff
 --output

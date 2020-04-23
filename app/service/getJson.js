@@ -114,7 +114,7 @@ const deDuplication1 = (data) => {
     return resultArr;
 };
 
-// 格式化数据-foodlist
+// 格式化数据-foodList
 // https://i.waimai.meituan.com/openh5/poi/food
 const deDuplication2 = (res) => {
     if(!res) {
@@ -128,9 +128,9 @@ const deDuplication2 = (res) => {
         for (let i = 0; i < data.length; i++) {
             let item = data[i];
             let categoryName = item.categoryName||'';
-            let foodlist = item.spuList || [];
-            for (let j = 0; j < foodlist.length; j++) {
-                let tempItem = foodlist[j]||{};
+            let foodList = item.spuList || [];
+            for (let j = 0; j < foodList.length; j++) {
+                let tempItem = foodList[j]||{};
                 let item2 = {
                     spuName: tempItem.spuName, //商品名称
                     unit: tempItem.unit, //计量单位
@@ -303,16 +303,18 @@ const getWoff = (filePath) => {
 };
 
 const getJsonService = {
-    async getData(path, type) {
+    async getData(parentsPath, type) {
         let res = {};
-        let file = path;
+        let file = parentsPath;
+        let typePath = '';
         if(type === 'shopList') {
-            file += '/shopList';
+            typePath = 'shopList';
         } else if(type === 'foodList') {
-            file += '/foodList';
+            typePath = 'foodList';
         } else if(type === 'searchList') {
-            file += '/searchList';
+            typePath = 'searchList';
         }
+        file = path.join(parentsPath, typePath);
         let isExists1 = await getStat(file);
         if(!isExists1) {
             // 路径不存在
@@ -322,7 +324,7 @@ const getJsonService = {
             }
             return res;
         }
-        const woffPath = `${path}/woff.json`;
+        const woffPath = path.join(parentsPath, 'woff.json');
         let isExists2 = await getStat(woffPath);
         if(!isExists2) {
             // 文件不存在
