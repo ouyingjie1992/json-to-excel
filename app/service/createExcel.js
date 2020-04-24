@@ -243,7 +243,7 @@ async function dirExists(dir) {
 }
 
 const createExcelService = {
-	async createFile(fileName, data, type, savefileName) {
+	async createFile(fileName, data, type, filePath) {
 
         const initOption = (tableName, tableModel, data, options) => {
             let option = {};
@@ -292,10 +292,7 @@ const createExcelService = {
 		}
 
 		let buffer = xlsx.build(optionObj); //生成buffer文件流
-		let outPath = `testData/output/`;
-		if (savefileName) {
-			outPath += `${savefileName}/`;
-		}
+		let outPath = path.join(filePath, 'output');
 		await dirExists(outPath);
 		let outPathReal = path.resolve(outPath);
 		// console.log(fileName)

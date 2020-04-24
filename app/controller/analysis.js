@@ -3,13 +3,13 @@ const woffToJsonCtrl = require('./woffToJson');
 const jsonToExcelCtrl = require('./jsonToExcel');
 
 
-async function woffToJson(fileName) {
-    let res = await woffToJsonCtrl.init(fileName);
+async function woffToJson(filePath) {
+    let res = await woffToJsonCtrl.init(filePath);
     return res;
 };
 
-async function jsonToExcel(fileName) {
-    let res = await jsonToExcelCtrl.init(fileName);
+async function jsonToExcel(filePath) {
+    let res = await jsonToExcelCtrl.init(filePath);
     return res;
 };
 

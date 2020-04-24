@@ -10,29 +10,32 @@ router.get("/", async (ctx, next) => {
 router.get("/jsonToExcel", async (ctx, next) => {
     // 解析json转化excel
     let query = ctx.query||{};
-    let fileName = query.fileName||'';
-    let res = await analysisCtrl.jsonToExcel(fileName);
+    let filePath = query.filePath||'';
+    let res = await analysisCtrl.jsonToExcel(filePath);
 	ctx.body = res;
 });
 
 router.get("/woffToJson", async (ctx, next) => {
     // 解析woff转化json
     let query = ctx.query||{};
-    let fileName = query.fileName||'';
-    let res = await analysisCtrl.woffToJson(fileName);
+    let filePath = query.filePath||'';
+    let res = await analysisCtrl.woffToJson(filePath);
 	ctx.body = res;
 });
 
 router.get("/createExcel", async (ctx, next) => {
     // 生成Excel
     let query = ctx.query||{};
-    let fileName = query.fileName||'';
-    let res = await analysisCtrl.woffToJson(fileName);
+    let filePath = query.filePath||'';
+    let res = await analysisCtrl.woffToJson(filePath);
     let res2 = {};
     if(res.code === 5000) {
-        res2 = await analysisCtrl.jsonToExcel(fileName);
+        res2 = await analysisCtrl.jsonToExcel(filePath);
+    } else {
+        res2 = res;
     }
 	ctx.body = res2;
 });
+
 
 module.exports = router;

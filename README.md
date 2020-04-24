@@ -1,10 +1,10 @@
 # json-to-excel
 json-to-excel
 
-/createExcel?fileName=fileName
+/createExcel?filePath=D:\git\json-to-excel\testData\data\20200424
 
 testData目录结构：
---source
+--data
     --fileName
         --foodList
             --data.json
@@ -13,5 +13,4 @@ testData目录结构：
         --searchList
             --data.json
         --test.woff
---output
 --xmlKey.json

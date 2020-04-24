@@ -5,10 +5,10 @@ import sys
 # import time
 from fontTools.ttLib import TTFont
 sourcePath = sys.argv[1]
-fileName = sys.argv[2]
+outPath = sys.argv[2]
 def get():
-    font = TTFont(sourcePath + fileName)
-    font.saveXML(sourcePath + 'test.xml')
+    font = TTFont(sourcePath)
+    font.saveXML(outPath)
 get()
 # time.sleep(3)
 # print(sys.argv[1])

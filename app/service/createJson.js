@@ -4,11 +4,12 @@
  */
 const fs = require("fs");
 const cheerio = require('cheerio');
+const path = require('path');
 
 const createJsonService = {
-	async createFile(path) {
+	async createFile(parentPath) {
         // 获取秘钥json文件：比对xml中<TTGlyph=>第一个contour=>第一个pt的字形数值
-        let keyData = fs.readFileSync('testData/xmlKey.json');
+        let keyData = fs.readFileSync('lib/json/xmlKey.json');
         keyData = JSON.parse(keyData);
         let key = {};
         for(let i=0; i<keyData.length; i++) {
@@ -17,7 +18,7 @@ const createJsonService = {
             key[keyName] = item.label;
         }
         // 获取xml文件
-        let data = fs.readFileSync(`${path}test.xml`);
+        let data = fs.readFileSync(path.join(parentPath, 'test.xml'));
         let resJson = [];
         const val = data.toString();
         let $ = cheerio.load(val, {
@@ -42,7 +43,7 @@ const createJsonService = {
         }
         console.log('解密转化执行完毕');
         // 写入json文件
-        let filePath = `${path}woff.json`;
+        let filePath = path.join(parentPath, 'woff.json');
         fs.writeFileSync(filePath, JSON.stringify(resJson, null, '\t'));
 
 		return {
